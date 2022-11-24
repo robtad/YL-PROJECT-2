@@ -31,3 +31,14 @@ C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\MultiThreadingApp\obj\De
 C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.csproj.CoreCompileInputs.cache
 C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.exe
 C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.pdb
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\bin\Debug\MultiThreadingApp.exe.config
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\bin\Debug\MultiThreadingApp.exe
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\bin\Debug\MultiThreadingApp.pdb
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.csproj.AssemblyReference.cache
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.csproj.SuggestedBindingRedirects.cache
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.Form1.resources
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.Properties.Resources.resources
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.csproj.GenerateResource.cache
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.csproj.CoreCompileInputs.cache
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.exe
+C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\MultiThreadingApp\obj\Debug\MultiThreadingApp.pdb
