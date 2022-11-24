@@ -73,28 +73,13 @@ namespace MultiThreadingApp
             return splitted_target.Length;
         }
         
-        //writing results to datagridview
-        public void AddResult(int i, int j)
-        {
-
-            //dtNew = dt.Clone();
-            //dtNew.ImportRow(row);
-            //row == dt.rows[i]
-            //row == dt.rows[j]
-            //dtNew.Rows.Add(dt.Rows[i]);
-            //dtNew.Rows.Add(dt.Rows[j]);
-
-            dtNew.ImportRow(dt.Rows[i]);
-            dtNew.ImportRow(dt.Rows[j]);
-
-            //dataGridView2.DataSource = dtNew;
-
-        }
+       
 
         public void check_similarity(int column, int inequality_flag, float similarity_percentage)
         {
             dtNew = dt.Clone();//datatable for the outputs of similarity check
                                //add columns for dtDisplay
+            dtNew.Clear();
             DataTable dtDisplay =  new DataTable();
 
             dtDisplay.Columns.Add("KAYIT 1", typeof(String));
@@ -137,13 +122,12 @@ namespace MultiThreadingApp
                             tBox.AppendText("(i,j) = (" + i + "," + j + ")");
                             tBox.AppendText(Environment.NewLine);
                             string percent = percentage + "%";
-                            AddResult(i, j);
 
                             //MyTable.Rows.Add(MyTable2.Rows[0]["Id"], MyTable2.Rows[0]["Name"]);
                             dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percentage + "%");
 
                             //write the following at the end of outer for loop
-                            
+                           
                             dtNew.ImportRow(dt.Rows[i]);
                             dtNew.ImportRow(dt.Rows[j]);
 
@@ -160,7 +144,7 @@ namespace MultiThreadingApp
 
 
             }
-            dataGridView1.DataSource = dtNew;
+            //dataGridView1.DataSource = dtNew;
             dataGridView2.DataSource = dtDisplay;
 
 
@@ -192,16 +176,24 @@ namespace MultiThreadingApp
              
         }
 
+       
+
         private void dataGridView2_CellClick(object sender, DataGridViewCellEventArgs e)
         {
 
             int index = e.RowIndex;
-            //dtNew.Rows.Clear();
-            dataGridView1.DataSource = dtNew.Rows[index];
-            dataGridView1.DataSource = dtNew.Rows[index+1];
+            //
+            DataTable dtTemp;
+            dtTemp = dtNew.Clone();
+            dtTemp.ImportRow(dtNew.Rows[2*index]);
+            dtTemp.ImportRow(dtNew.Rows[2*index+1]);
+
+            dataGridView1.DataSource = dtTemp;
+            //dataGridView1.DataSource = dtNew;
 
 
-            //dataGridView1
+            ///
+            //tBox.AppendText("DATA GRID VIEW CELL CLICK. INDEX = " + index + " and " + (index+1));
 
         }
     }

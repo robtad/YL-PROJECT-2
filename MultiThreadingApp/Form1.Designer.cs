@@ -114,7 +114,7 @@
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(121, 20);
             this.textBox2.TabIndex = 9;
-            this.textBox2.Text = "Enter Similarity %";
+            this.textBox2.Text = "%";
             // 
             // Form1
             // 
