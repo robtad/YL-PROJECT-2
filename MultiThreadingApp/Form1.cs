@@ -75,7 +75,7 @@ namespace MultiThreadingApp
         
        
 
-        public void check_similarity(int column, int inequality_flag, float similarity_percentage)
+        public void check_similarity(int column, int column2, int inequality_flag, float similarity_percentage)
         {
             dtNew = dt.Clone();//datatable for the outputs of similarity check
                                //add columns for dtDisplay
@@ -86,64 +86,72 @@ namespace MultiThreadingApp
             dtDisplay.Columns.Add("KAYIT 2", typeof(String));
             dtDisplay.Columns.Add("BENZERLİK ORANI", typeof(String));
 
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                //column designates the column to be checked for similarity(product or issue)
-                
-                var set1 = splitter(i, column, dt);
-
-                for (int j = i+1; j < dt.Rows.Count; j++)
+            
+            
+                for (int i = 0; i < dt.Rows.Count; i++)
                 {
-                    var set2 = splitter(j, column, dt);
-                    //check intersection between set1 and set2
-                    HashSet<string> intersection = new HashSet<string>(set1);
-                    intersection.IntersectWith(set2);
-                    //calculate percentage depending on intersection
-                    if (intersection.Count>0)
+                    //column designates the column to be checked for similarity(product or issue)
+
+                    var set1 = splitter(i, column, dt);
+
+                    for (int j = i + 1; j < dt.Rows.Count; j++)
                     {
-                        float len1_n_len2 = intersection.Count();
-                        tBox.AppendText(string.Join(", ", intersection));
-                        tBox.AppendText(Environment.NewLine);
-                        //tBox.AppendText("intersection len = " + len1_n_len2);
-
-                        float len1 = ListLen(i, column, dt);
-                        float len2 = ListLen(j, column, dt);
-                        float longer = len1 >= len2 ? len1 : len2;
-                        float percentage = (len1_n_len2 / longer)*100;
-                        percentage = (float)Math.Round(percentage, 1);
-
-                        if (percentage >= similarity_percentage)
+                        var set2 = splitter(j, column, dt);
+                        //check intersection between set1 and set2
+                        HashSet<string> intersection = new HashSet<string>(set1);
+                        intersection.IntersectWith(set2);
+                        //calculate percentage depending on intersection
+                        if (intersection.Count > 0)
                         {
-                            
-                            tBox.AppendText("intersection len = " + len1_n_len2 + "-> " + len1 + ", " + len2);
+                            float len1_n_len2 = intersection.Count();
+                            tBox.AppendText(string.Join(", ", intersection));
                             tBox.AppendText(Environment.NewLine);
-                            tBox.AppendText("intersection percentage = " + percentage + "%");
-                            tBox.AppendText(Environment.NewLine);
-                            tBox.AppendText("(i,j) = (" + i + "," + j + ")");
-                            tBox.AppendText(Environment.NewLine);
-                            string percent = percentage + "%";
+                            //tBox.AppendText("intersection len = " + len1_n_len2);
 
-                            //MyTable.Rows.Add(MyTable2.Rows[0]["Id"], MyTable2.Rows[0]["Name"]);
-                            dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percentage + "%");
+                            float len1 = ListLen(i, column, dt);
+                            float len2 = ListLen(j, column, dt);
+                            float longer = len1 >= len2 ? len1 : len2;
+                            float percentage = (len1_n_len2 / longer) * 100;
+                            percentage = (float)Math.Round(percentage, 1);
 
-                            //write the following at the end of outer for loop
-                           
-                            dtNew.ImportRow(dt.Rows[i]);
-                            dtNew.ImportRow(dt.Rows[j]);
+                            if (percentage >= similarity_percentage)
+                            {
+                                string percent = percentage + "%";
 
-                            //dataGridView1.DataSource = dtNew;
-                             
+                                if (column2 != -1)
+                                {
+
+                                    if (dt.Rows[i][column2].ToString().Equals(dt.Rows[j][column2].ToString()))
+                                    {
+                                        dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+                                        dtNew.ImportRow(dt.Rows[i]);
+                                        dtNew.ImportRow(dt.Rows[j]);
+                                        //return;
+                                    }
+                                }
+                                else 
+                                {
+                                    dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+                                    dtNew.ImportRow(dt.Rows[i]);
+                                    dtNew.ImportRow(dt.Rows[j]);
+                                } 
+                                
+
+                                //dataGridView1.DataSource = dtNew;
+
+                            }
+
+
+
                         }
-
 
 
                     }
 
 
                 }
-
-
-            }
+            
+            
             //dataGridView1.DataSource = dtNew;
             dataGridView2.DataSource = dtDisplay;
 
@@ -154,24 +162,37 @@ namespace MultiThreadingApp
         private void button1_Click(object sender, EventArgs e)
         {
             tBox.Clear();
+
             
-            //dataGridView2.DataSource = dtNew;
             //getting column to be checked from a user (using combobox's dropdown list)
+            //float similarity_percentage = (float)Convert.ToDouble(textBox2.Text);
+            //float similarity_percentage2 = (float)Convert.ToDouble(textBox1.Text);
+
             if (!float.TryParse(textBox2.Text, out float similarity_percentage))
             {
-                MessageBox.Show("Please enter a number for similarity percentage");
-                return;
+                //MessageBox.Show("Please enter a number for similarity percentage");
+                //return;
             }
+           
+            if (string.IsNullOrWhiteSpace(textBox2.Text))
+            {
+                similarity_percentage = -1;
+            }
+            
+            /*
             if (comboBox1.SelectedItem == null || comboBox2.SelectedItem == null)
             {
                 MessageBox.Show("Wrong Column or Inequality Operator!\nTry Again!");
                 return;
             }
+            */
+
             //float similarity_percentage = float.Parse(textBox2.Text);
             int column = comboBox1.SelectedIndex;
             int inequality = comboBox2.SelectedIndex;
 
-            check_similarity(column, inequality, similarity_percentage);
+            int column2 = comboBox4.SelectedIndex;
+            check_similarity(column, column2,inequality, similarity_percentage);
 
              
         }
