@@ -75,7 +75,7 @@ namespace MultiThreadingApp
         
        
 
-        public void check_similarity(int column, int column2, int inequality_flag, float similarity_percentage)
+        public void check_similarity(int column, int column2, int inequality_flag, float similarity_percentage, int benchmarkCol, string benchmarkVal)
         {
             dtNew = dt.Clone();//datatable for the outputs of similarity check
                                //add columns for dtDisplay
@@ -86,16 +86,39 @@ namespace MultiThreadingApp
             dtDisplay.Columns.Add("KAYIT 2", typeof(String));
             dtDisplay.Columns.Add("BENZERLİK ORANI", typeof(String));
 
-            
+                int flag = 0;//to check if benchmark column is compared
+                
             
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     //column designates the column to be checked for similarity(product or issue)
 
                     var set1 = splitter(i, column, dt);
+                    int start_index = i + 1;
 
-                    for (int j = i + 1; j < dt.Rows.Count; j++)
+                    if (flag == 1)
                     {
+                        break;
+                    }
+                    if(benchmarkCol != -1) 
+                    {
+                        if (!(dt.Rows[i][benchmarkCol].ToString().Equals(benchmarkVal)))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            flag = 1;
+                            start_index = 0;
+                        }
+
+                    }
+                    for (int j = start_index; j < dt.Rows.Count; j++)
+                    {
+                        if(i==j)
+                        {
+                            continue;
+                        }
                         var set2 = splitter(j, column, dt);
                         //check intersection between set1 and set2
                         HashSet<string> intersection = new HashSet<string>(set1);
@@ -190,9 +213,11 @@ namespace MultiThreadingApp
             //float similarity_percentage = float.Parse(textBox2.Text);
             int column = comboBox1.SelectedIndex;
             int inequality = comboBox2.SelectedIndex;
-
             int column2 = comboBox4.SelectedIndex;
-            check_similarity(column, column2,inequality, similarity_percentage);
+
+            int benchmarkCol = comboBox3.SelectedIndex;
+            string benchmarkVal = textBox1.Text;
+            check_similarity(column, column2,inequality, similarity_percentage, benchmarkCol, benchmarkVal);
 
              
         }
