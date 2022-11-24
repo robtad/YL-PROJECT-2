@@ -40,7 +40,7 @@ namespace MultiThreadingApp
         {
             InitializeComponent();
             //var dt = ConvertCSVtoDataTable(@"C:\Users\RobTad\Documents\KoU\YAZLAB-1\P2\sample.csv");
-            var dt = Csv_to_table(@"C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\small_sample.csv");
+            //var dt = Csv_to_table(@"C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\small_sample.csv");
             //dataGridView1.DataSource = dt;
             
         }
@@ -75,18 +75,21 @@ namespace MultiThreadingApp
         
        
 
-        public void check_similarity(int column, int column2, int inequality_flag, float similarity_percentage, int benchmarkCol, string benchmarkVal)
+        public void check_similarity(int column, int column2, int inequality_flag, float similarity_percentage, int benchmarkCol, string benchmarkVal, int display_column)
         {
             dtNew = dt.Clone();//datatable for the outputs of similarity check
                                //add columns for dtDisplay
             dtNew.Clear();
+            //for dataGridView2
             DataTable dtDisplay =  new DataTable();
 
             dtDisplay.Columns.Add("KAYIT 1", typeof(String));
             dtDisplay.Columns.Add("KAYIT 2", typeof(String));
             dtDisplay.Columns.Add("BENZERLİK ORANI", typeof(String));
+            //for dataGridView3
+            DataTable dt3 = new DataTable();
 
-                int flag = 0;//to check if benchmark column is compared
+            int flag = 0;//to check if benchmark column is compared
                 
             
                 for (int i = 0; i < dt.Rows.Count; i++)
@@ -141,7 +144,7 @@ namespace MultiThreadingApp
                             {
                                 string percent = percentage + "%";
 
-                                if (column2 != -1)
+                                if (column2 != -1)//for the same selected column
                                 {
 
                                     if (dt.Rows[i][column2].ToString().Equals(dt.Rows[j][column2].ToString()))
@@ -177,7 +180,23 @@ namespace MultiThreadingApp
             
             //dataGridView1.DataSource = dtNew;
             dataGridView2.DataSource = dtDisplay;
+            //add column and distinct rows from dtNew to datagridview3 for display_column
+            if(display_column != -1)
+            {
+                //dt3.Columns.Add(dt.Columns[display_column].ToString(), typeof(String));
+                //dt.DefaultView.ToTable(true, new String[] { "columnName" });
 
+                DataView view = new DataView(dtNew);
+                DataTable dtDistinct = view.ToTable(true, dtNew.Columns[display_column].ToString());
+                dataGridView3.DataSource = dtDistinct;
+
+
+                //dt3.Rows.Add(dtNew.Rows[i][display_column]); //use select and distinct
+
+                //dtNew.ImportRow(dt.Rows[0]);
+
+
+            }
 
         }
         //DataTable containing all the csv records (dt)
@@ -217,7 +236,9 @@ namespace MultiThreadingApp
 
             int benchmarkCol = comboBox3.SelectedIndex;
             string benchmarkVal = textBox1.Text;
-            check_similarity(column, column2,inequality, similarity_percentage, benchmarkCol, benchmarkVal);
+
+            int display_column = comboBox5.SelectedIndex;
+            check_similarity(column, column2,inequality, similarity_percentage, benchmarkCol, benchmarkVal, display_column);
 
              
         }
