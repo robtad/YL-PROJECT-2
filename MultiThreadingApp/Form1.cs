@@ -15,7 +15,7 @@ namespace MultiThreadingApp
 {
     public partial class Form1 : Form
     {
-        public DataTable dt = Csv_to_table(@"C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\sample.csv");
+        public DataTable dt = Csv_to_table(@"C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\sample.csv");
         public DataTable dtNew;
         //public DataTable dtDisplay =  new DataTable();
         int threadNum;
@@ -50,8 +50,7 @@ namespace MultiThreadingApp
         public Form1()
         {
             InitializeComponent();
-            //var dt = ConvertCSVtoDataTable(@"C:\Users\RobTad\Documents\KoU\YAZLAB-1\P2\sample.csv");
-            //var dt = Csv_to_table(@"C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\small_sample.csv");
+            
             //dataGridView1.DataSource = dt;
             CheckForIllegalCrossThreadCalls = false;
             /*
@@ -71,8 +70,7 @@ namespace MultiThreadingApp
             string[] splitted_target;
             splitted_target = target.Split(' ');
             var target_set = new HashSet<string>(splitted_target);
-            //tBox.AppendText(string.Join(", ", splitted_target));
-            //tBox.AppendText(string.Join(", ", target_set));
+            
             return target_set;
         }
 
@@ -108,7 +106,7 @@ namespace MultiThreadingApp
             int flag = 0;//to check if benchmark column is compared
                 
             
-                for (int i = num * (dt.Rows.Count / threadNum); i < (num + 1) * (dt.Rows.Count / threadNum); i++)
+                for (int i = num * (dt.Rows.Count / threadNum); i < (num + 1) * (200 / threadNum); i++)
                 {
                     //column designates the column to be checked for similarity(product or issue)
 
@@ -146,16 +144,14 @@ namespace MultiThreadingApp
                         if (intersection.Count > 0)
                         {
                             float len1_n_len2 = intersection.Count();
-                            //tBox.AppendText(string.Join(", ", intersection));
-                            //tBox.AppendText(Environment.NewLine);
-                            //tBox.AppendText("intersection len = " + len1_n_len2);
-
+                            
                             float len1 = ListLen(i, column, dt);
                             float len2 = ListLen(j, column, dt);
                             float longer = len1 >= len2 ? len1 : len2;
                             float percentage = (len1_n_len2 / longer) * 100;
                             percentage = (float)Math.Round(percentage, 1);
-
+                        if (inequality_flag == 0)
+                        {
                             if (percentage >= similarity_percentage)
                             {
                                 string percent = percentage + "%";
@@ -165,30 +161,103 @@ namespace MultiThreadingApp
 
                                     if (dt.Rows[i][column2].ToString().Equals(dt.Rows[j][column2].ToString()))
                                     {
+                                        lock (this)
+                                        {
+                                            dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+
+                                            dtNew.ImportRow(dt.Rows[i]);
+                                            dtNew.ImportRow(dt.Rows[j]);
+                                        }
+                                    }
+                                }
+                                else
+                                {
                                     lock (this)
                                     {
                                         dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
-                                        //dataGridView2.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+                                    }
+                                    lock (this)
+                                    {
                                         dtNew.ImportRow(dt.Rows[i]);
                                         dtNew.ImportRow(dt.Rows[j]);
-                                        //return;
-                                    }
                                     }
                                 }
-                                else 
-                                {
-                                lock (this)
-                                {
-                                    dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
-                                }
-                                lock (this)
-                                {
-                                    dtNew.ImportRow(dt.Rows[i]);
-                                    dtNew.ImportRow(dt.Rows[j]);
-                                }
-                                } 
                                 //dataGridView1.DataSource = dtNew;
                             }
+
+                        }
+                        else if(inequality_flag == 1)
+                        {
+                            if (percentage <= similarity_percentage)
+                            {
+                                string percent = percentage + "%";
+
+                                if (column2 != -1)//for the same selected column
+                                {
+
+                                    if (dt.Rows[i][column2].ToString().Equals(dt.Rows[j][column2].ToString()))
+                                    {
+                                        lock (this)
+                                        {
+                                            dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+
+                                            dtNew.ImportRow(dt.Rows[i]);
+                                            dtNew.ImportRow(dt.Rows[j]);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    lock (this)
+                                    {
+                                        dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+                                    }
+                                    lock (this)
+                                    {
+                                        dtNew.ImportRow(dt.Rows[i]);
+                                        dtNew.ImportRow(dt.Rows[j]);
+                                    }
+                                }
+                                //dataGridView1.DataSource = dtNew;
+                            }
+                        }
+                        /*
+                        else
+                        {
+                            if (percentage == similarity_percentage)
+                            {
+                                string percent = percentage + "%";
+
+                                if (column2 != -1)//for the same selected column
+                                {
+
+                                    if (dt.Rows[i][column2].ToString().Equals(dt.Rows[j][column2].ToString()))
+                                    {
+                                        lock (this)
+                                        {
+                                            dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+
+                                            dtNew.ImportRow(dt.Rows[i]);
+                                            dtNew.ImportRow(dt.Rows[j]);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    lock (this)
+                                    {
+                                        dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+                                    }
+                                    lock (this)
+                                    {
+                                        dtNew.ImportRow(dt.Rows[i]);
+                                        dtNew.ImportRow(dt.Rows[j]);
+                                    }
+                                }
+                                //dataGridView1.DataSource = dtNew;
+                            }
+                        }
+                         */   
                         }
                     }
                 }
@@ -225,6 +294,7 @@ namespace MultiThreadingApp
 
         private void button1_Click(object sender, EventArgs e)
         {
+            dataGridView2.DataSource = null;
             dtNew = dt.Clone();//datatable for the outputs of similarity check
                                //add columns for dtDisplay
             dtNew.Clear();
@@ -355,11 +425,6 @@ namespace MultiThreadingApp
                 DataTable dtDistinct = view.ToTable(true, dtNew.Columns[display_column].ToString());
                 dataGridView3.DataSource = dtDistinct;
             }
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }
