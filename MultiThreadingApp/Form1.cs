@@ -1,18 +1,30 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.ComponentModel;
+//using System.ComponentModel;
 using System.Data;
-using System.Drawing;
+//using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+//using System.Text;
+//using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
+using System.Diagnostics;
 
 namespace MultiThreadingApp
 {
     public partial class Form1 : Form
     {
+        public DataTable dt = Csv_to_table(@"C:\Users\syaku\Desktop\New folder\YL-PROJECT-2\sample.csv");
+        public DataTable dtNew;
+        //public DataTable dtDisplay =  new DataTable();
+        int threadNum;
+        int maxNum = 1000;
+        int column, column2, inequality, benchmarkCol, display_column;
+        string benchmarkVal;
+        float similarity_percentage;
+        DataTable dtDisplay = new DataTable();
+
         public static DataTable Csv_to_table(string CSVFilePathName)
         {
             string[] Lines = File.ReadAllLines(CSVFilePathName);
@@ -32,7 +44,6 @@ namespace MultiThreadingApp
                     Row[f] = Fields[f];
                 dt.Rows.Add(Row);
             }
-
             return dt;
         }
         
@@ -42,14 +53,16 @@ namespace MultiThreadingApp
             //var dt = ConvertCSVtoDataTable(@"C:\Users\RobTad\Documents\KoU\YAZLAB-1\P2\sample.csv");
             //var dt = Csv_to_table(@"C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\small_sample.csv");
             //dataGridView1.DataSource = dt;
-            
+            CheckForIllegalCrossThreadCalls = false;
+            /*
+            dataGridView2.Columns.Add("KAYIT 1", "KAYIT 1");
+            dataGridView2.Columns.Add("KAYIT 2", "KAYIT 2");
+            dataGridView2.Columns.Add("BENZERLİK ORANI", "BENZERLİK ORANI");
+            */
+            dtDisplay.Columns.Add("KAYIT 1", typeof(String));
+            dtDisplay.Columns.Add("KAYIT 2", typeof(String));
+            dtDisplay.Columns.Add("BENZERLİK ORANI", typeof(String));
         }
-
-
-        public DataTable dt = Csv_to_table(@"C:\Users\RobTad\Documents\KoU\YAZILIMLAB-1\YL-PROJECT-2\small_sample.csv");
-        public DataTable dtNew;
-        //public DataTable dtDisplay =  new DataTable();
-        
 
         public HashSet<string> splitter(int i,int column, DataTable dt)
         {
@@ -60,7 +73,6 @@ namespace MultiThreadingApp
             var target_set = new HashSet<string>(splitted_target);
             //tBox.AppendText(string.Join(", ", splitted_target));
             //tBox.AppendText(string.Join(", ", target_set));
-            
             return target_set;
         }
 
@@ -72,27 +84,31 @@ namespace MultiThreadingApp
             splitted_target = target.Split(' ');
             return splitted_target.Length;
         }
-        
        
-
         public void check_similarity(int column, int column2, int inequality_flag, float similarity_percentage, int benchmarkCol, string benchmarkVal, int display_column)
         {
-            dtNew = dt.Clone();//datatable for the outputs of similarity check
-                               //add columns for dtDisplay
-            dtNew.Clear();
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            // dtNew = dt.Clone();//datatable for the outputs of similarity check
+            //add columns for dtDisplay
+            // dtNew.Clear();
             //for dataGridView2
+            int num = int.Parse(Thread.CurrentThread.Name);
+            /*
             DataTable dtDisplay =  new DataTable();
 
             dtDisplay.Columns.Add("KAYIT 1", typeof(String));
             dtDisplay.Columns.Add("KAYIT 2", typeof(String));
             dtDisplay.Columns.Add("BENZERLİK ORANI", typeof(String));
+            */
+
             //for dataGridView3
             DataTable dt3 = new DataTable();
 
             int flag = 0;//to check if benchmark column is compared
                 
             
-                for (int i = 0; i < dt.Rows.Count; i++)
+                for (int i = num * (dt.Rows.Count / threadNum); i < (num + 1) * (dt.Rows.Count / threadNum); i++)
                 {
                     //column designates the column to be checked for similarity(product or issue)
 
@@ -130,8 +146,8 @@ namespace MultiThreadingApp
                         if (intersection.Count > 0)
                         {
                             float len1_n_len2 = intersection.Count();
-                            tBox.AppendText(string.Join(", ", intersection));
-                            tBox.AppendText(Environment.NewLine);
+                            //tBox.AppendText(string.Join(", ", intersection));
+                            //tBox.AppendText(Environment.NewLine);
                             //tBox.AppendText("intersection len = " + len1_n_len2);
 
                             float len1 = ListLen(i, column, dt);
@@ -149,38 +165,40 @@ namespace MultiThreadingApp
 
                                     if (dt.Rows[i][column2].ToString().Equals(dt.Rows[j][column2].ToString()))
                                     {
+                                    lock (this)
+                                    {
                                         dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+                                        //dataGridView2.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
                                         dtNew.ImportRow(dt.Rows[i]);
                                         dtNew.ImportRow(dt.Rows[j]);
                                         //return;
                                     }
+                                    }
                                 }
                                 else 
                                 {
+                                lock (this)
+                                {
                                     dtDisplay.Rows.Add(dt.Rows[i][column], dt.Rows[j][column], percent);
+                                }
+                                lock (this)
+                                {
                                     dtNew.ImportRow(dt.Rows[i]);
                                     dtNew.ImportRow(dt.Rows[j]);
+                                }
                                 } 
-                                
-
                                 //dataGridView1.DataSource = dtNew;
-
                             }
-
-
-
                         }
-
-
                     }
-
-
                 }
-            
-            
+
             //dataGridView1.DataSource = dtNew;
-            dataGridView2.DataSource = dtDisplay;
+            
+            //dataGridView2.DataSource = dtDisplay;
+                        
             //add column and distinct rows from dtNew to datagridview3 for display_column
+            /*
             if(display_column != -1)
             {
                 //dt3.Columns.Add(dt.Columns[display_column].ToString(), typeof(String));
@@ -190,27 +208,35 @@ namespace MultiThreadingApp
                 DataTable dtDistinct = view.ToTable(true, dtNew.Columns[display_column].ToString());
                 dataGridView3.DataSource = dtDistinct;
 
-
                 //dt3.Rows.Add(dtNew.Rows[i][display_column]); //use select and distinct
 
                 //dtNew.ImportRow(dt.Rows[0]);
-
-
             }
-
+            */
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            //Console.WriteLine("All time {0}. Thread - {1}", Thread.CurrentThread.Name, ts);
+            tBox.AppendText(Environment.NewLine);
+            tBox.AppendText(Thread.CurrentThread.Name + ". Thread - " + ts.TotalSeconds);
+            tBox.AppendText(Environment.NewLine);
         }
+
         //DataTable containing all the csv records (dt)
 
         private void button1_Click(object sender, EventArgs e)
         {
+            dtNew = dt.Clone();//datatable for the outputs of similarity check
+                               //add columns for dtDisplay
+            dtNew.Clear();
+            dtDisplay.Clear();
+            
             tBox.Clear();
 
-            
             //getting column to be checked from a user (using combobox's dropdown list)
             //float similarity_percentage = (float)Convert.ToDouble(textBox2.Text);
             //float similarity_percentage2 = (float)Convert.ToDouble(textBox1.Text);
 
-            if (!float.TryParse(textBox2.Text, out float similarity_percentage))
+            if (!float.TryParse(textBox2.Text, out similarity_percentage))
             {
                 //MessageBox.Show("Please enter a number for similarity percentage");
                 //return;
@@ -230,26 +256,30 @@ namespace MultiThreadingApp
             */
 
             //float similarity_percentage = float.Parse(textBox2.Text);
-            int column = comboBox1.SelectedIndex;
-            int inequality = comboBox2.SelectedIndex;
-            int column2 = comboBox4.SelectedIndex;
+            column = comboBox1.SelectedIndex;
+            inequality = comboBox2.SelectedIndex;
+            column2 = comboBox4.SelectedIndex;
 
-            int benchmarkCol = comboBox3.SelectedIndex;
-            string benchmarkVal = textBox1.Text;
+            benchmarkCol = comboBox3.SelectedIndex;
+            benchmarkVal = textBox1.Text;
 
-            int display_column = comboBox5.SelectedIndex;
-            check_similarity(column, column2,inequality, similarity_percentage, benchmarkCol, benchmarkVal, display_column);
+            threadNum = int.Parse(textBox3.Text);
 
-             
+            display_column = comboBox5.SelectedIndex;
+
+            myThreads();
+            //backgroundWorker1.RunWorkerAsync();
         }
 
-       
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            myThreads();
+        }
 
         private void dataGridView2_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-
             int index = e.RowIndex;
-            //
+            
             DataTable dtTemp;
             dtTemp = dtNew.Clone();
             dtTemp.ImportRow(dtNew.Rows[2*index]);
@@ -258,9 +288,77 @@ namespace MultiThreadingApp
             dataGridView1.DataSource = dtTemp;
             //dataGridView1.DataSource = dtNew;
 
-
             ///
             //tBox.AppendText("DATA GRID VIEW CELL CLICK. INDEX = " + index + " and " + (index+1));
+        }
+
+        private void callCalculator()
+        {
+            check_similarity(column, column2, inequality, similarity_percentage, benchmarkCol, benchmarkVal, display_column);
+        }
+
+        private void myThreads()
+        {
+            Thread[] threads = new Thread[threadNum];
+
+            // CurrentThread gets you the current
+            // executing thread
+            //Thread.CurrentThread.Name = "main";
+
+            // Create 15 threads that will call for 
+            // IssueWithdraw to execute
+            for (int i = 0; i < threadNum; i++)
+            {
+                // You can only point at methods
+                // without arguments and that return 
+                // nothing
+                Thread t = new Thread(new
+                    ThreadStart(callCalculator));
+                t.Name = i.ToString();
+                threads[i] = t;
+            }
+
+            // Have threads try to execute
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            for (int i = 0; i < threadNum; i++)
+            {
+                // Check if thread has started
+                //Console.WriteLine("Thread {0} Alive : {1}",
+                //    threads[i].Name, threads[i].IsAlive);
+                tBox.AppendText("Thread " + threads[i].Name + " Alive : " + threads[i].IsAlive);
+                tBox.AppendText(Environment.NewLine);
+                // Start thread
+                threads[i].Start();
+
+                // Check if thread has started
+                //Console.WriteLine("Thread {0} Alive : {1}",
+                //    threads[i].Name, threads[i].IsAlive);
+                tBox.AppendText("Thread " + threads[i].Name + " Alive : " + threads[i].IsAlive);
+                tBox.AppendText(Environment.NewLine);
+            }
+            for (int i = 0; i < threadNum; i++)
+            {
+                threads[i].Join();
+            }
+            stopWatch.Stop();
+            dataGridView2.DataSource = dtDisplay;
+            TimeSpan ts = stopWatch.Elapsed;
+            //Console.WriteLine("All time {0}. Thread - {1}", Thread.CurrentThread.Name, ts);
+            tBox.AppendText(Environment.NewLine);
+            tBox.AppendText("Total time " + Thread.CurrentThread.Name + " Threads - " + ts);
+            tBox.AppendText(Environment.NewLine);
+
+            if (display_column != -1)
+            {
+                DataView view = new DataView(dtNew);
+                DataTable dtDistinct = view.ToTable(true, dtNew.Columns[display_column].ToString());
+                dataGridView3.DataSource = dtDistinct;
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
 
         }
     }
